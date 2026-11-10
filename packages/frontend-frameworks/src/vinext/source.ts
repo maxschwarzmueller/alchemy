@@ -25,6 +25,7 @@ import type {
  * the same plugin stack.
  */
 import cloudflare from "@alchemy.run/cloudflare-runtime/vite";
+import { yieldDeclared } from "alchemy/Util/effect";
 import type * as Context from "effect/Context";
 import * as Data from "effect/Data";
 import * as Effect from "effect/Effect";
@@ -747,8 +748,7 @@ const resolveVinextCacheEnv = (env: Record<string, unknown>) =>
     for (const key of [VINEXT_KV_CACHE_BINDING, VINEXT_CACHE_BINDING]) {
       const value = env[key];
       if (value == null || isBindingMarker(value)) continue;
-      // oxlint-disable-next-line effecttsgo/unsafe-effect-type-assertion -- cache bindings are pre-resolved resource Effects
-      resolved[key] = Effect.isEffect(value) ? yield* value as Effect.Effect<unknown> : value;
+      resolved[key] = yield* yieldDeclared(value);
     }
     return resolved;
   });
